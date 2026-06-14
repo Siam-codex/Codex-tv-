@@ -90,7 +90,7 @@
                 <div class="w-full mt-4 px-1 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-2">
                     <div>
                         <h2 id="current-title" class="text-lg md:text-xl font-bold text-slate-100 tracking-wide">
-                            বাগানের স্বাগতম! যেকোনো একটি চ্যানেল বেছে নিন 🍿
+                            বাগানে স্বাগতম! যেকোনো একটি চ্যানেল বেছে নিন 🍿
                         </h2>
                         <p id="stream-status" class="text-xs md:text-sm text-slate-500 mt-0.5">সব কার্টুন, স্পোর্টস এবং মুভি চ্যানেল বাম পাশে পেয়ে যাবেন।</p>
                     </div>
@@ -113,11 +113,11 @@
     </div>
 
     <script>
-        // ⚙️ আল্ট্রা-ইমপ্রুভড আর্কিটেকচার কনফিগ
+        // ⚙️ আল্ট্রা-ইমপ্রুভড আর্কিটেকচার কনফিগ (CORS Proxy ফিক্সড)
         const SYSTEM_CONFIG = {
-            primaryFeed: "https://iptv-org.github.io/iptv/index.m3u",
-            backupFeed: "https://raw.githubusercontent.com/iptv-org/iptv/master/playlists/index.m3u",
-            pageSize: 50 // প্রতিবারে সর্বোচ্চ ৫০টি চ্যানেল দেখাবে (স্মুথ পারফরম্যান্সের গোপন ট্রিক)
+            primaryFeed: "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://iptv-org.github.io/iptv/index.m3u"),
+            backupFeed: "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://raw.githubusercontent.com/iptv-org/iptv/master/playlists/index.m3u"),
+            pageSize: 50 
         };
 
         let masterDatabase = [];
@@ -139,7 +139,7 @@
                 let data = await res.text();
                 parseM3UEngine(data);
             } catch (e) {
-                console.warn("প্রাইমারি সার্ভার ডাউন, ব্যাকআপ সার্ভারে সুইচ করা হচ্ছে...");
+                console.warn("প্রাইমারি সার্ভার রেসপন্স করেনি, ব্যাকআপ সার্ভারে সুইচ করা হচ্ছে...");
                 try {
                     let bRes = await fetch(SYSTEM_CONFIG.backupFeed);
                     let bData = await bRes.text();
@@ -180,7 +180,7 @@
             resetAndFilter();
         }
 
-        // স্মার্ট লেজি রেন্ডারিং সিস্টেম (ডোম ওভারলোডিং প্রোটেকশন)
+        // SMART LAZY RENDERING ENGINE (DOM Overflow Protection)
         function renderNextBatch(append = false) {
             if (!append) {
                 listDOM.innerHTML = "";
@@ -233,7 +233,7 @@
             loadedIndex += SYSTEM_CONFIG.pageSize;
         }
 
-        // ইনফিনিট স্ক্রোল হ্যান্ডলার (নিচে নামলে অটো চ্যানেল লোড হবে)
+        // ইনফিনিট স্ক্রোল হ্যান্ডলার
         function handleSidebarScroll() {
             if (listDOM.scrollTop + listDOM.clientHeight >= listDOM.scrollHeight - 60) {
                 if (loadedIndex < filteredDatabase.length) {
@@ -256,11 +256,11 @@
             localStorage.setItem('codex_tv_favs', JSON.stringify(favoritesList));
             
             if (document.getElementById('category-select').value === 'favorites') {
-                resetAndFilter(); // ফেভারিট ক্যাটাগরিতে থাকলে রিয়েল-টাইমে লিস্ট থেকে রিমুভ হবে
+                resetAndFilter();
             }
         }
 
-        // সুপার ফিল্টারিং অ্যালগরিদম (সার্চ ও ক্যাটাগরি কম্বিনেশন)
+        // মাল্টি-লেয়ার ফিল্টারিং অ্যালগরিদম
         function resetAndFilter() {
             const query = document.getElementById('search-box').value.toLowerCase();
             const category = document.getElementById('category-select').value;
@@ -275,18 +275,18 @@
                 if (category === 'favorites') {
                     matchCat = favoritesList.includes(ch.name);
                 } else if (category === 'animation') {
-                    matchCat = gLower.includes('animation') || gLower.includes('kids') || nLower.includes('disney') || nLower.includes('cartoon') || nLower.includes('nick') || nLower.includes('yay') || nLower.includes('duronto') || nLower.includes('pogo');
+                    matchCat = gLower.includes('animation') || gLower.includes('kids') || nLower.includes('disney') || nLower.includes('cartoon') || nLower.includes('nick') || nLower.includes('yay') || nLower.includes('duronto') || nLower.includes('pogo') || nLower.includes('hungama') || nLower.includes('sonic');
                 } else if (category === 'sports') {
-                    matchCat = gLower.includes('sports') || nLower.includes('sports') || nLower.includes('cricket') || nLower.includes('football') || nLower.includes('t sports') || nLower.includes('gazi') || nLower.includes('ten') || nLower.includes('sony sports');
+                    matchCat = gLower.includes('sports') || nLower.includes('sports') || nLower.includes('cricket') || nLower.includes('football') || nLower.includes('t sports') || nLower.includes('gazi') || nLower.includes('ten') || nLower.includes('sony sports') || nLower.includes('star sports');
                 } else if (category === 'movies') {
-                    matchCat = gLower.includes('movies') || nLower.includes('movie') || nLower.includes('cinema') || nLower.includes('hbo') || nLower.includes('action') || nLower.includes('goldmines') || nLower.includes('star movies');
+                    matchCat = gLower.includes('movies') || nLower.includes('movie') || nLower.includes('cinema') || nLower.includes('hbo') || nLower.includes('action') || nLower.includes('goldmines') || nLower.includes('star movies') || nLower.includes('wb') || nLower.includes('cineplex');
                 }
 
                 return matchSearch && matchCat;
             });
 
             document.getElementById('total-count').innerText = filteredDatabase.length;
-            renderNextBatch(false); // নতুন করে ফিল্টার করা ডাটা রেন্ডার হবে
+            renderNextBatch(false);
         }
 
         // গ্লিচ-ফ্রি এবং লিক-প্রুফ মিডিয়া স্ট্রিমিং কোর
@@ -295,7 +295,7 @@
             statusDOM.innerText = "সংযোগ সফল করা হচ্ছে... ⚡";
             statusDOM.className = "text-xs text-teal-400 mt-0.5";
 
-            // মেমোরি লিক ও গ্লিচ রুখতে আগের প্লেব্যাক অবজেক্ট সম্পূর্ণ ধ্বংস করা
+            // মেমোরি ফ্ল্যাশ ও বাফারিং গ্লিচ রিমুভাল
             if (hlsCore) {
                 hlsCore.stopLoad();
                 hlsCore.detachMedia();
@@ -307,7 +307,7 @@
                 hlsCore = new Hls({
                     maxBufferLength: 30,
                     maxMaxBufferLength: 60,
-                    enableWorker: true, // ব্যাকগ্রাউন্ড থ্রেডে স্মুথ বাফারিং অপারেশন
+                    enableWorker: true,
                     lowLatencyMode: true,
                     manifestLoadingMaxRetry: 5,
                     manifestLoadingRetryDelay: 1500
@@ -324,7 +324,7 @@
                     });
                 });
 
-                // অটো-এরর রিকভারি এবং বাফারিং সেলফ-হিলিং মেকানিজম
+                // অটো-সেলফ হিলিং রিকভারি
                 hlsCore.on(Hls.Events.ERROR, (event, data) => {
                     if (data.fatal) {
                         switch (data.type) {
@@ -344,7 +344,6 @@
                     }
                 });
             } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                // Safari বা iOS এর জন্য নেটিভ স্ট্রিমিং সাপোর্ট
                 videoPlayer.src = streamUrl;
                 videoPlayer.addEventListener('loadedmetadata', () => {
                     videoPlayer.play();
@@ -357,4 +356,4 @@
         window.onload = initEngine;
     </script>
 </body>
-      </html>
+    </html>
