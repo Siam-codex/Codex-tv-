@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODEX TV GARDEN 📺</title>
+    <!-- Tailwind CSS for Modern & Responsive Styling -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- HLS.js for Bulletproof Live Streaming -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body {
+            background-color: #05070f;
+            color: #f1f5f9;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow: hidden;
+        }
+        /* Premium Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #14b8a6;
+        }
+        /* Identity Glow Animation */
+        @keyframes identityGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(20, 184, 166, 0.4)); }
+            50% { transform: scale(1.01); filter: drop-shadow(0 0 16px rgba(20, 184, 166, 0.7)); }
+        }
+        .premium-branding {
+            animation: identityGlow 3.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flex flex-col h-screen md:flex-row m-0 p-0 overflow-hidden">
+        
+        <!-- 🧭 বাম পাশের কন্ট্রোল প্যানেল (চ্যানেল নেভিগেটর) -->
+        <div class="w-full md:w-90 bg-slate-900/95 border-b md:border-b-0 md:border-r border-slate-800/80 flex flex-col h-full z-10 shadow-2xl">
+            
+            <div class="p-4 bg-slate-950/90 border-b border-slate-800/60 space-y-3">
+                <h1 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 tracking-wider">
+                    🌲 CODEX TV GARDEN
+                </h1>
+                
+                <!-- আল্ট্রা সার্চ ফিল্টার -->
+                <input type="text" id="search-box" oninput="resetAndFilter()" placeholder="চ্যানেলের নাম লিখুন (Disney, Sports, Nick...)" 
+                       class="w-full bg-slate-800/90 text-sm text-slate-100 placeholder-slate-500 px-3 py-2.5 rounded-xl border border-slate-700/50 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all duration-200">
+                
+                <!-- এডভান্সড ক্যাটাগরি ফিল্টার -->
+                <select id="category-select" onchange="resetAndFilter()" 
+                        class="w-full bg-slate-800/90 text-sm text-slate-100 px-3 py-2.5 rounded-xl border border-slate-700/50 focus:outline-none focus:border-teal-500 transition-all duration-200 cursor-pointer">
+                    <option value="all">🍿 সব চ্যানেল (All Channels)</option>
+                    <option value="favorites">⭐ আমার পছন্দের তালিকা (Favorites)</option>
+                    <option value="animation">🧸 কার্টুন / অ্যানিমেশন (Cartoon)</option>
+                    <option value="sports">🏆 খেলাধুলা / ওয়ার্ল্ড কাপ (Sports)</option>
+                    <option value="movies">🎬 মুভি / সিনেমা (Movies)</option>
+                </select>
+                
+                <div class="text-xs text-slate-400 flex justify-between items-center px-0.5">
+                    <span>সার্ভার স্ট্যাটাস: <b id="loading-status" class="text-amber-400 animate-pulse">কানেক্টিং...⏳</b></span>
+                    <span class="bg-slate-800/80 px-2.5 py-0.5 rounded-full text-slate-300">চ্যানেল: <b id="total-count" class="text-teal-400">০</b></span>
+                </div>
+            </div>
+            
+            <!-- চ্যানেল লিস্ট (ইনফিনিট স্ক্রোলিং এরিয়া) -->
+            <div class="flex-1 overflow-y-auto p-2 space-y-1 bg-slate-950/20" id="channel-list" onscroll="handleSidebarScroll()">
+                <!-- জাভাস্ক্রিপ্ট ডাইনামিক ডেটা ইনজেকশন -->
+            </div>
+        </div>
+
+        <!-- 📺 ডান পাশের মেইন সিনেমাটিক প্লেয়ার ভিউ -->
+        <div class="flex-1 flex flex-col bg-slate-950 justify-between items-center p-4 md:p-6 h-full overflow-y-auto">
+            
+            <div class="w-full max-w-4xl my-auto flex flex-col items-center">
+                <!-- হাই-পারফরম্যান্স প্লেয়ার কন্টেইনার -->
+                <div class="w-full bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.95)] border border-slate-900/60 transition-all hover:border-teal-500/10">
+                    <video id="video-player" controls autoplay playsinline class="w-full aspect-video bg-black"></video>
+                </div>
+                
+                <!-- রিয়েল-টাইম মেটাডাটা ডিসপ্লে -->
+                <div class="w-full mt-4 px-1 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-2">
+                    <div>
+                        <h2 id="current-title" class="text-lg md:text-xl font-bold text-slate-100 tracking-wide">
+                            বাগানের স্বাগতম! যেকোনো একটি চ্যানেল বেছে নিন 🍿
+                        </h2>
+                        <p id="stream-status" class="text-xs md:text-sm text-slate-500 mt-0.5">সব কার্টুন, স্পোর্টস এবং মুভি চ্যানেল বাম পাশে পেয়ে যাবেন।</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 🌟 প্রিমিয়াম অ্যানিমেটেড ক্রেডিট সেকশন -->
+            <div class="w-full max-w-4xl mt-4 border-t border-slate-900/80 pt-4 flex justify-center z-20">
+                <div class="premium-branding bg-gradient-to-r from-teal-950/20 via-slate-900 to-emerald-950/20 border border-teal-500/20 px-6 py-2.5 rounded-full shadow-lg">
+                    <p class="text-xs md:text-sm font-semibold tracking-widest text-slate-400 text-center">
+                        ⚡ CODE ARCHITECTURE BY 
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400 font-black drop-shadow-sm">
+                            SIAM CODEX
+                        </span> ⚡
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ⚙️ আল্ট্রা-ইমপ্রুভড আর্কিটেকচার কনফিগ
+        const SYSTEM_CONFIG = {
+            primaryFeed: "https://iptv-org.github.io/iptv/index.m3u",
+            backupFeed: "https://raw.githubusercontent.com/iptv-org/iptv/master/playlists/index.m3u",
+            pageSize: 50 // প্রতিবারে সর্বোচ্চ ৫০টি চ্যানেল দেখাবে (স্মুথ পারফরম্যান্সের গোপন ট্রিক)
+        };
+
+        let masterDatabase = [];
+        let filteredDatabase = [];
+        let favoritesList = JSON.parse(localStorage.getItem('codex_tv_favs')) || [];
+        let loadedIndex = 0;
+        
+        const videoPlayer = document.getElementById('video-player');
+        const listDOM = document.getElementById('channel-list');
+        const titleDOM = document.getElementById('current-title');
+        const statusDOM = document.getElementById('stream-status');
+        let hlsCore = null;
+
+        // প্লেলিস্ট বুটস্ট্র্যাপার ও রিকভারি ইঞ্জিন
+        async function initEngine() {
+            try {
+                let res = await fetch(SYSTEM_CONFIG.primaryFeed);
+                if (!res.ok) throw new Error();
+                let data = await res.text();
+                parseM3UEngine(data);
+            } catch (e) {
+                console.warn("প্রাইমারি সার্ভার ডাউন, ব্যাকআপ সার্ভারে সুইচ করা হচ্ছে...");
+                try {
+                    let bRes = await fetch(SYSTEM_CONFIG.backupFeed);
+                    let bData = await bRes.text();
+                    parseM3UEngine(bData);
+                } catch (err) {
+                    document.getElementById('loading-status').innerHTML = "<span class='text-rose-500'>অফলাইন ❌</span>";
+                }
+            }
+        }
+
+        // হাই-স্পিড রেগুলার এক্সপ্রেশন বেসড M3U পার্সার
+        function parseM3UEngine(m3uRaw) {
+            const lines = m3uRaw.split('\n');
+            let item = null;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line.startsWith('#EXTINF:')) {
+                    const nameMatch = line.match(/,(.+)$/);
+                    const name = nameMatch ? nameMatch[1].trim() : "Premium Channel";
+                    const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                    const logo = logoMatch ? logoMatch[1] : "";
+                    const groupMatch = line.match(/group-title="([^"]+)"/);
+                    const group = groupMatch ? groupMatch[1].toLowerCase() : "general";
+
+                    item = { name, logo, group, url: "" };
+                } else if (line.startsWith('http') && item) {
+                    item.url = line;
+                    masterDatabase.push(item);
+                    item = null;
+                }
+            }
+
+            const indicator = document.getElementById('loading-status');
+            indicator.innerText = "অনলাইন 🟢";
+            indicator.className = "text-emerald-400 font-bold";
+            
+            resetAndFilter();
+        }
+
+        // স্মার্ট লেজি রেন্ডারিং সিস্টেম (ডোম ওভারলোডিং প্রোটেকশন)
+        function renderNextBatch(append = false) {
+            if (!append) {
+                listDOM.innerHTML = "";
+                loadedIndex = 0;
+            }
+
+            const nextBatch = filteredDatabase.slice(loadedIndex, loadedIndex + SYSTEM_CONFIG.pageSize);
+            if (nextBatch.length === 0 && !append) {
+                listDOM.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">কোনো চ্যানেল খুঁজে পাওয়া যায়নি 🔍</p>`;
+                return;
+            }
+
+            const containerFragment = document.createDocumentFragment();
+
+            nextBatch.forEach(ch => {
+                const isFav = favoritesList.includes(ch.name);
+                const card = document.createElement('div');
+                card.className = "w-full flex items-center justify-between p-2 rounded-xl bg-slate-800/20 hover:bg-teal-950/30 border border-transparent hover:border-teal-500/20 transition-all duration-150 group";
+                
+                const fallbackThumb = `https://placehold.co/60x60/0f172a/0d9488?text=${encodeURIComponent(ch.name.slice(0,2))}`;
+                const logoImg = ch.logo ? ch.logo : fallbackThumb;
+
+                card.innerHTML = `
+                    <button class="flex items-center gap-3 flex-1 text-left cursor-pointer overflow-hidden truncate">
+                        <img src="${logoImg}" class="w-8 h-8 rounded-lg object-contain bg-slate-950 border border-slate-800" onerror="this.src='${fallbackThumb}'">
+                        <span class="font-medium text-xs text-slate-300 group-hover:text-teal-300 transition-colors truncate">${ch.name}</span>
+                    </button>
+                    <button class="fav-btn p-1.5 text-slate-600 hover:text-amber-400 transition-colors cursor-pointer text-sm" title="পছন্দের তালিকায় রাখুন">
+                        ${isFav ? '⭐' : '☆'}
+                    </button>
+                `;
+
+                // চ্যানেল প্লে করার ইভেন্ট
+                card.querySelector('button').onclick = () => {
+                    document.querySelectorAll('#channel-list > div').forEach(b => b.classList.remove('bg-teal-950/30', 'border-teal-500/20'));
+                    card.classList.add('bg-teal-950/30', 'border-teal-500/20');
+                    loadStreamEngine(ch.url, ch.name);
+                };
+
+                // ফেভারিট টগল করার ইভেন্ট
+                card.querySelector('.fav-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    toggleFavoriteChannel(ch.name, card.querySelector('.fav-btn'));
+                };
+
+                containerFragment.appendChild(card);
+            });
+
+            listDOM.appendChild(containerFragment);
+            loadedIndex += SYSTEM_CONFIG.pageSize;
+        }
+
+        // ইনফিনিট স্ক্রোল হ্যান্ডলার (নিচে নামলে অটো চ্যানেল লোড হবে)
+        function handleSidebarScroll() {
+            if (listDOM.scrollTop + listDOM.clientHeight >= listDOM.scrollHeight - 60) {
+                if (loadedIndex < filteredDatabase.length) {
+                    renderNextBatch(true);
+                }
+            }
+        }
+
+        // ফেভারিট অ্যাড/রিমুভ মেকানিজম
+        function toggleFavoriteChannel(name, buttonElement) {
+            if (favoritesList.includes(name)) {
+                favoritesList = favoritesList.filter(f => f !== name);
+                buttonElement.innerText = '☆';
+                buttonElement.classList.remove('text-amber-400');
+            } else {
+                favoritesList.push(name);
+                buttonElement.innerText = '⭐';
+                buttonElement.classList.add('text-amber-400');
+            }
+            localStorage.setItem('codex_tv_favs', JSON.stringify(favoritesList));
+            
+            if (document.getElementById('category-select').value === 'favorites') {
+                resetAndFilter(); // ফেভারিট ক্যাটাগরিতে থাকলে রিয়েল-টাইমে লিস্ট থেকে রিমুভ হবে
+            }
+        }
+
+        // সুপার ফিল্টারিং অ্যালগরিদম (সার্চ ও ক্যাটাগরি কম্বিনেশন)
+        function resetAndFilter() {
+            const query = document.getElementById('search-box').value.toLowerCase();
+            const category = document.getElementById('category-select').value;
+
+            filteredDatabase = masterDatabase.filter(ch => {
+                const matchSearch = ch.name.toLowerCase().includes(query);
+                const nLower = ch.name.toLowerCase();
+                const gLower = ch.group;
+                
+                let matchCat = true;
+
+                if (category === 'favorites') {
+                    matchCat = favoritesList.includes(ch.name);
+                } else if (category === 'animation') {
+                    matchCat = gLower.includes('animation') || gLower.includes('kids') || nLower.includes('disney') || nLower.includes('cartoon') || nLower.includes('nick') || nLower.includes('yay') || nLower.includes('duronto') || nLower.includes('pogo');
+                } else if (category === 'sports') {
+                    matchCat = gLower.includes('sports') || nLower.includes('sports') || nLower.includes('cricket') || nLower.includes('football') || nLower.includes('t sports') || nLower.includes('gazi') || nLower.includes('ten') || nLower.includes('sony sports');
+                } else if (category === 'movies') {
+                    matchCat = gLower.includes('movies') || nLower.includes('movie') || nLower.includes('cinema') || nLower.includes('hbo') || nLower.includes('action') || nLower.includes('goldmines') || nLower.includes('star movies');
+                }
+
+                return matchSearch && matchCat;
+            });
+
+            document.getElementById('total-count').innerText = filteredDatabase.length;
+            renderNextBatch(false); // নতুন করে ফিল্টার করা ডাটা রেন্ডার হবে
+        }
+
+        // গ্লিচ-ফ্রি এবং লিক-প্রুফ মিডিয়া স্ট্রিমিং কোর
+        function loadStreamEngine(streamUrl, name) {
+            titleDOM.innerText = name;
+            statusDOM.innerText = "সংযোগ সফল করা হচ্ছে... ⚡";
+            statusDOM.className = "text-xs text-teal-400 mt-0.5";
+
+            // মেমোরি লিক ও গ্লিচ রুখতে আগের প্লেব্যাক অবজেক্ট সম্পূর্ণ ধ্বংস করা
+            if (hlsCore) {
+                hlsCore.stopLoad();
+                hlsCore.detachMedia();
+                hlsCore.destroy();
+                hlsCore = null;
+            }
+
+            if (Hls.isSupported()) {
+                hlsCore = new Hls({
+                    maxBufferLength: 30,
+                    maxMaxBufferLength: 60,
+                    enableWorker: true, // ব্যাকগ্রাউন্ড থ্রেডে স্মুথ বাফারিং অপারেশন
+                    lowLatencyMode: true,
+                    manifestLoadingMaxRetry: 5,
+                    manifestLoadingRetryDelay: 1500
+                });
+                hlsCore.loadSource(streamUrl);
+                hlsCore.attachMedia(videoPlayer);
+                
+                hlsCore.on(Hls.Events.MANIFEST_PARSED, () => {
+                    videoPlayer.play().then(() => {
+                        statusDOM.innerText = "লাইভ সম্প্রচার সচল আছে 🟢";
+                        statusDOM.className = "text-xs text-emerald-400 mt-0.5";
+                    }).catch(() => {
+                        statusDOM.innerText = "প্লেয়ার প্রস্তুত, ভিডিওর মাঝখানে প্লে বাটনে ক্লিক করুন 🎯";
+                    });
+                });
+
+                // অটো-এরর রিকভারি এবং বাফারিং সেলফ-হিলিং মেকানিজম
+                hlsCore.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                statusDOM.innerText = "🔄 নেটওয়ার্ক সিগন্যাল দুর্বল, পুনরায় চেষ্টা করা হচ্ছে...";
+                                hlsCore.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                statusDOM.innerText = "🔄 স্ট্রিমিং ফ্রেম ফিক্স করা হচ্ছে...";
+                                hlsCore.recoverMediaError();
+                                break;
+                            default:
+                                statusDOM.innerText = "❌ চ্যানেলটি অফলাইন বা স্ট্রিম সোর্স সাময়িকভাবে বন্ধ আছে।";
+                                statusDOM.className = "text-xs text-rose-400 mt-0.5";
+                                break;
+                        }
+                    }
+                });
+            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                // Safari বা iOS এর জন্য নেটিভ স্ট্রিমিং সাপোর্ট
+                videoPlayer.src = streamUrl;
+                videoPlayer.addEventListener('loadedmetadata', () => {
+                    videoPlayer.play();
+                    statusDOM.innerText = "লাইভ সচল 🟢";
+                });
+            }
+        }
+
+        // উইন্ডো বুটস্ট্র্যাপ লোডার
+        window.onload = initEngine;
+    </script>
+</body>
+      </html>
